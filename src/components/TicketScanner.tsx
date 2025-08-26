@@ -37,25 +37,17 @@ export default function TicketScanner({ eventId }: TicketScannerProps) {
 
   const handleScan = async () => {
     if (!ticketId.trim() || !user?.id) return;
-
+  
     setScanResult(null);
     try {
-      const result = await scanTicket({ 
+      await scanTicket({ 
         ticketId: ticketId.trim() as Id<"tickets">, 
         scannerId: user.id 
       });
       
-      let message = "Ticket scanned successfully!";
-      if (result.allScanned) {
-        message = `All ${result.totalCount} tickets validated for this user!`;
-      } else if (result.remainingCount > 0) {
-        message = `${result.scannedCount}/${result.totalCount} tickets scanned. ${result.remainingCount} remaining to scan.`;
-      }
-      
       setScanResult({
         success: true,
-        message,
-        ...result
+        message: "Ticket scanned successfully!"
       });
       setTicketId("");
     } catch (error: any) {
@@ -176,32 +168,29 @@ export default function TicketScanner({ eventId }: TicketScannerProps) {
           {tickets.length > 0 && (
             <div>
               <h4 className="text-md font-semibold mb-3">All Tickets</h4>
-              <div className="bg-white rounded-lg overflow-hidden">
-                <div className="max-h-60 overflow-y-auto">
-                  {tickets.map((ticket: any) => (
-                    <div key={ticket._id} className="flex items-center justify-between p-3 border-b border-gray-100 last:border-b-0">
-                      <div className="flex-1">
-                        <div className="font-medium text-sm">{ticket.user?.name || 'Unknown User'}</div>
-                        <div className="text-xs text-gray-500">{ticket.user?.email || 'No email'}</div>
-                        <div className="text-xs text-gray-400">ID: {ticket._id}</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          ticket.status === 'used' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-orange-100 text-orange-800'
-                        }`}>
-                          {ticket.status === 'used' ? 'Scanned' : 'Pending'}
-                        </span>
-                        {ticket.scannedAt && (
-                          <div className="text-xs text-gray-500">
-                            {new Date(ticket.scannedAt).toLocaleTimeString()}
-                          </div>
-                        )}
-                      </div>
+              <div className="space-y-2">
+                {tickets.map((ticket) => (
+                  <div key={ticket._id} className="flex items-center justify-between p-2 bg-gray-50 rounded-md">
+                    <div className="text-sm text-gray-600">
+                      ID: {ticket._id.slice(0,8)}... 
+                      User: {ticket.user?.name || 'Unknown'} ({ticket.user?.email || 'No email'})
                     </div>
-                  ))}
-                </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        ticket.status === 'used' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {ticket.status === 'used' ? 'Scanned' : 'Pending'}
+                      </span>
+                      {ticket.scannedAt && (
+                        <div className="text-xs text-gray-500">
+                          {new Date(ticket.scannedAt).toLocaleTimeString()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -210,3 +199,5 @@ export default function TicketScanner({ eventId }: TicketScannerProps) {
     </div>
   );
 }
+
+// Remove grouping logic

@@ -110,15 +110,18 @@ export const scanTicket = mutation({
       scannedAt: Date.now(),
     });
     
-    // Get all tickets for this user and event to show status
-    const userTickets = await ctx.db
+    // Get all tickets for this user, event, and passId
+    const userTicketsQuery = ctx.db
       .query("tickets")
       .withIndex("by_user_event", (q) => q.eq("userId", ticket.userId).eq("eventId", ticket.eventId))
-      .filter((q) => q.or(
-        q.eq(q.field("status"), TICKET_STATUS.VALID),
-        q.eq(q.field("status"), TICKET_STATUS.USED)
-      ))
-      .collect();
+      .filter((q) => q.and(
+        q.eq(q.field("passId"), ticket.passId),
+        q.or(
+          q.eq(q.field("status"), TICKET_STATUS.VALID),
+          q.eq(q.field("status"), TICKET_STATUS.USED)
+        )
+      ));
+    const userTickets = await userTicketsQuery.collect();
     
     const scannedCount = userTickets.filter(t => t.status === TICKET_STATUS.USED).length;
     const totalCount = userTickets.length;
@@ -293,15 +296,18 @@ export const getTicketStatus = query({
     const ticket = await ctx.db.get(ticketId);
     if (!ticket) return null;
     
-    // Get all user tickets for this event
-    const userTickets = await ctx.db
+    // Get all user tickets for this event and passId
+    const userTicketsQuery = ctx.db
       .query("tickets")
       .withIndex("by_user_event", (q) => q.eq("userId", ticket.userId).eq("eventId", ticket.eventId))
-      .filter((q) => q.or(
-        q.eq(q.field("status"), TICKET_STATUS.VALID),
-        q.eq(q.field("status"), TICKET_STATUS.USED)
-      ))
-      .collect();
+      .filter((q) => q.and(
+        q.eq(q.field("passId"), ticket.passId),
+        q.or(
+          q.eq(q.field("status"), TICKET_STATUS.VALID),
+          q.eq(q.field("status"), TICKET_STATUS.USED)
+        )
+      ));
+    const userTickets = await userTicketsQuery.collect();
     
     const scannedCount = userTickets.filter(t => t.status === TICKET_STATUS.USED).length;
     

@@ -15,22 +15,18 @@ export default function TicketPage({ params }: { params: Promise<{ ticketId: str
   
   const ticket = useQuery(api.tickets.getById, { ticketId: ticketIdTyped });
   const event = useQuery(api.events.getById, ticket?.eventId ? { eventId: ticket.eventId } : "skip");
-  const userTickets = useQuery(api.tickets.getUserTicketsForEvent, 
-    ticket?.eventId && user?.id ? {
-      eventId: ticket.eventId,
-      userId: user.id,
-    } : "skip"
-  );
-
-
-  if (!ticket || !event || !userTickets) {
+  
+  // Remove userTickets query to focus on single ticket
+  
+  if (!ticket || !event) {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">Loading...</div>
     </div>;
   }
-
-  const ticketCount = userTickets.length;
-  const totalAmount = userTickets.reduce((sum, t) => sum + (t.amount || 0), 0);
+  
+  // Use single ticket data
+  const ticketCount = 1;
+  const totalAmount = ticket.amount || 0;
 
   if (ticket.userId !== user?.id) {
     return <div className="min-h-screen bg-gray-50 flex items-center justify-center">

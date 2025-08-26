@@ -58,8 +58,7 @@ export default function EventCard({ eventId, hideBuyButton = false }: { eventId:
           <div className="flex items-center">
             <CircleArrowRight className="w-5 h-5 text-amber-500 mr-2" />
             <span className="text-amber-700 font-medium">
-              You&apos;re next in line! (Queue position:{" "}
-              {queuePosition.position})
+              You&apos;re next in line! (Queue position: {queuePosition.position})
             </span>
           </div>
           <div className="flex items-center">
@@ -215,18 +214,20 @@ export default function EventCard({ eventId, hideBuyButton = false }: { eventId:
   return (
     <div
       onClick={() => router.push(`/event/${eventId}`)}
-      className={`bg-white rounded-xl shadow-sm hover:shadow-xl hover:scale-105 transition-all duration-300 border border-gray-100 cursor-pointer overflow-hidden relative group ${
+      className={`bg-white rounded-lg shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-300 border border-gray-100 cursor-pointer overflow-hidden relative group ${
         isPastEvent ? "opacity-75 hover:opacity-100" : ""
       }`}
     >
-      {/* Event Image */}
-      <div className="relative w-full h-48 sm:h-64 md:h-80 overflow-hidden">
+      <div className="relative w-full h-40 sm:h-56 md:h-72 overflow-hidden">
         <Image
-          src={imageUrl || `/event-images/image.png`}
+          src={`${imageUrl}?t=${Date.now()}`}
           alt={event.name}
           fill
           className="object-cover group-hover:scale-110 transition-transform duration-500"
           priority
+          loading="eager"
+          key={imageUrl} // Ensures the image component re-renders when the source changes
+          unoptimized // Disable Next.js optimization for immediate loading
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent group-hover:from-black/60 transition-all duration-300" />
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -259,21 +260,27 @@ export default function EventCard({ eventId, hideBuyButton = false }: { eventId:
           </div>
 
           {/* Price Tag */}
-          <div className="flex flex-col items-end gap-2 ml-4">
-            <span
-              className={`px-2 sm:px-4 py-1 sm:py-1.5 text-sm sm:text-base font-semibold rounded-full ${
-                isPastEvent
-                  ? "bg-gray-50 text-gray-500"
-                  : "bg-green-50 text-green-700"
-              }`}
-            >
-₹{event.price.toFixed(2)}
-            </span>
-            {availability.purchasedCount >= availability.totalTickets && (
-              <span className="px-3 py-1 bg-red-100 text-red-700 font-semibold rounded-full text-xs uppercase tracking-wide text-center">
-                Sold Out
+          <div className="flex flex-col items-end gap-2 ml-10">
+            {!isPastEvent && (
+              <span
+                className={`px-2 sm:px-9 py-1 sm:py-1.5 text-sm sm:text-base font-semibold rounded-full ${
+                  availability.remainingTickets > 0
+                    ? "bg-green-50 text-green-700"
+                    : "bg-red-50 text-red-700"
+                }`}
+              >
+                {availability.remainingTickets > 0 ? "Available" : "Sold Out"}
               </span>
             )}
+            <div>
+              {!isPastEvent && availability.activeOffers > 0 && !userTicket && (
+                <span className="text-amber-600 text-sm ml-2">
+                  ({availability.activeOffers}{" "}
+                  {availability.activeOffers === 1 ? "person" : "people"} trying
+                  to buy)
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -294,8 +301,8 @@ export default function EventCard({ eventId, hideBuyButton = false }: { eventId:
           <div className="flex items-center text-gray-600">
             <Ticket className="w-4 h-4 mr-2" />
             <span>
-              {availability.totalTickets} / {Math.max(0, availability.totalTickets - availability.purchasedCount)} available
-              {!isPastEvent && availability.activeOffers > 0 && !userTicket && (
+              {availability.purchasedCount} tickets sold ({isPastEvent || availability.remainingTickets === 0 ? 'Sold Out' : `${availability.remainingTickets} available`})
+              {!isPastEvent && availability.remainingTickets > 0 && availability.activeOffers > 0 && !userTicket && (
                 <span className="text-amber-600 text-sm ml-2">
                   ({availability.activeOffers}{" "}
                   {availability.activeOffers === 1 ? "person" : "people"} trying
