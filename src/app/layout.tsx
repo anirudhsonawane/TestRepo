@@ -6,6 +6,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import Header from "@/components/Header";
 import SyncUserWithConvex  from "../components/SyncUserWithConvex";
+import SmartFloatingButton from "@/components/SmartFloatingButton";
+import QuickHelpPopup from "@/components/QuickHelpPopup";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 
@@ -46,6 +48,8 @@ export default function RootLayout({
           <SyncUserWithConvex />
           {children}
           
+          <SmartFloatingButton />
+          <QuickHelpPopup />
           <Toaster />
           </ClerkProvider>
         </ConvexClientProvider>
