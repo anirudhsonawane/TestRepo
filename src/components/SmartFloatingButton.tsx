@@ -33,14 +33,16 @@ export default function SmartFloatingButton() {
   const hiddenPages = ['/admin', '/seller'];
   const shouldHide = hiddenPages.some(page => pathname.startsWith(page));
 
-  // Show notification after a delay (simulating new payment notification)
+  // Show notification after a delay (simulating new payment notification) - Only for admins
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowNotification(true);
-    }, 10000); // Show after 10 seconds
+    if (isAdmin) {
+      const timer = setTimeout(() => {
+        setShowNotification(true);
+      }, 10000); // Show after 10 seconds
 
-    return () => clearTimeout(timer);
-  }, []);
+      return () => clearTimeout(timer);
+    }
+  }, [isAdmin]);
 
   if (!isLoaded || !user || shouldHide) {
     return null;
@@ -137,19 +139,19 @@ export default function SmartFloatingButton() {
 
   return (
     <>
-      {/* Notification Badge */}
-      {showNotification && (
-        <div className="fixed top-4 right-4 z-50 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-pulse">
-          <Bell className="w-4 h-4" />
-          <span className="text-sm">New payment notification!</span>
-          <button
-            onClick={() => setShowNotification(false)}
-            className="ml-2 text-white hover:text-gray-200"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+        {/* Notification Badge - Only show for admins */}
+        {showNotification && isAdmin && (
+          <div className="fixed top-4 right-4 z-50 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-pulse">
+            <Bell className="w-4 h-4" />
+            <span className="text-sm">New payment notification!</span>
+            <button
+              onClick={() => setShowNotification(false)}
+              className="ml-2 text-white hover:text-gray-200"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
       <div className="fixed bottom-6 right-6 z-50">
         {/* Menu Items */}
@@ -196,13 +198,6 @@ export default function SmartFloatingButton() {
           )}
         </button>
 
-        {/* Backdrop */}
-        {isOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-20 z-40"
-            onClick={() => setIsOpen(false)}
-          />
-        )}
       </div>
     </>
   );
