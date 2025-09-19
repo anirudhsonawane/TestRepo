@@ -60,4 +60,32 @@ export default defineSchema({
     name: v.string(),
     stripeConnectId: v.optional(v.string()),
   }).index("by_user_id", ["userId"]),
+
+  paymentNotifications: defineTable({
+    eventId: v.id("events"),
+    userId: v.string(),
+    amount: v.number(),
+    quantity: v.number(),
+    passId: v.optional(v.id("passes")),
+    upiTransactionId: v.optional(v.string()),
+    paymentMethod: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    contactMethod: v.optional(v.string()),
+    contactInfo: v.optional(v.string()),
+    userInfo: v.optional(v.object({
+      name: v.optional(v.string()),
+      email: v.optional(v.string()),
+    })),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("verified"),
+      v.literal("rejected")
+    ),
+    verifiedAt: v.optional(v.number()),
+    ticketCreated: v.optional(v.boolean()),
+  })
+    .index("by_event", ["eventId"])
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"])
+    .index("by_event_status", ["eventId", "status"]),
 });

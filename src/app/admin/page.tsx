@@ -27,6 +27,8 @@ export default function AdminDashboard() {
 
   // Get all events for the admin
   const events = useQuery(api.events.getAll);
+  const paymentStats = useQuery(api.paymentNotifications.getStats);
+  const allPendingPayments = useQuery(api.paymentNotifications.getAllPending);
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -80,14 +82,14 @@ export default function AdminDashboard() {
     );
   }
 
-  // Mock data for dashboard stats
-  const dashboardStats = {
-    totalEvents: events?.length || 0,
-    pendingPayments: 12,
-    verifiedPayments: 45,
-    totalRevenue: 67500,
-    todayPayments: 8
-  };
+    // Real data for dashboard stats
+    const dashboardStats = {
+      totalEvents: events?.length || 0,
+      pendingPayments: paymentStats?.pending || 0,
+      verifiedPayments: paymentStats?.verified || 0,
+      totalRevenue: paymentStats?.totalAmount || 0,
+      rejectedPayments: paymentStats?.rejected || 0
+    };
 
   return (
     <div className="min-h-screen bg-gray-50">

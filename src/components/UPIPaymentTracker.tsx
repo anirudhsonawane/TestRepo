@@ -12,72 +12,22 @@ interface UPIPaymentTrackerProps {
   eventId: Id<"events">;
 }
 
-interface PaymentRequest {
-  id: string;
-  eventId: string;
-  userId: string;
-  amount: number;
-  quantity: number;
-  passId?: string;
-  status: 'pending' | 'verified' | 'rejected';
-  createdAt: number;
-  paymentProof?: string;
-  notes?: string;
-  userInfo?: {
-    name: string;
-    email: string;
-  };
-}
+// Use the actual Convex data model instead of interface
 
 export default function UPIPaymentTracker({ eventId }: UPIPaymentTrackerProps) {
   const { user } = useUser();
-  const [paymentRequests, setPaymentRequests] = useState<PaymentRequest[]>([]);
-  const [selectedPayment, setSelectedPayment] = useState<PaymentRequest | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const event = useQuery(api.events.getById, { eventId });
   const isEventOwner = user?.id === event?.userId;
 
-  // Mock data for demonstration - in real implementation, this would come from a database
-  const mockPaymentRequests: PaymentRequest[] = [
-    {
-      id: "1",
-      eventId: eventId,
-      userId: "user_123",
-      amount: 750,
-      quantity: 1,
-      status: 'pending',
-      createdAt: Date.now() - 1000 * 60 * 30, // 30 minutes ago
-      paymentProof: "Screenshot uploaded",
-      notes: "Payment completed via GPay",
-      userInfo: {
-        name: "John Doe",
-        email: "john@example.com"
-      }
-    },
-    {
-      id: "2",
-      eventId: eventId,
-      userId: "user_456",
-      amount: 1500,
-      quantity: 2,
-      status: 'pending',
-      createdAt: Date.now() - 1000 * 60 * 15, // 15 minutes ago
-      paymentProof: "UPI transaction ID: TXN789012345",
-      notes: "Payment via PhonePe",
-      userInfo: {
-        name: "Jane Smith",
-        email: "jane@example.com"
-      }
-    }
-  ];
+  // Get real payment notifications from Convex database
+  const paymentNotifications = useQuery(api.paymentNotifications.getByEvent, { eventId });
 
-  useEffect(() => {
-    // In real implementation, fetch from database
-    setPaymentRequests(mockPaymentRequests);
-  }, [eventId]);
+  const updateNotificationStatus = useMutation(api.paymentNotifications.updateStatus);
 
-  const handleVerifyPayment = async (payment: PaymentRequest) => {
+  const handleVerifyPayment = async (notification: any) => {
     setIsProcessing(true);
     try {
       // Call your manual UPI ticket creation API
@@ -85,28 +35,27 @@ export default function UPIPaymentTracker({ eventId }: UPIPaymentTrackerProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          eventId: payment.eventId,
-          userId: payment.userId,
-          paymentReference: `UPI-${payment.id}`,
-          quantity: payment.quantity,
-          amount: payment.amount,
-          passId: payment.passId,
-          upiTransactionId: payment.paymentProof,
-          notes: payment.notes
+          eventId: notification.eventId,
+          userId: notification.userId,
+          paymentReference: `UPI-${notification._id}`,
+          quantity: notification.quantity,
+          amount: notification.amount,
+          passId: notification.passId,
+          upiTransactionId: notification.upiTransactionId,
+          notes: notification.notes
         })
       });
 
       const result = await response.json();
       
       if (result.success) {
-        // Update payment status to verified
-        setPaymentRequests(prev => 
-          prev.map(p => 
-            p.id === payment.id 
-              ? { ...p, status: 'verified' as const }
-              : p
-          )
-        );
+        // Update notification status to verified in Convex
+        await updateNotificationStatus({
+          notificationId: notification._id,
+          status: 'verified',
+          ticketCreated: true
+        });
+        
         setSelectedPayment(null);
         toast.success("Payment verified and ticket created!");
       } else {
@@ -120,16 +69,19 @@ export default function UPIPaymentTracker({ eventId }: UPIPaymentTrackerProps) {
     }
   };
 
-  const handleRejectPayment = (payment: PaymentRequest) => {
-    setPaymentRequests(prev => 
-      prev.map(p => 
-        p.id === payment.id 
-          ? { ...p, status: 'rejected' as const }
-          : p
-      )
-    );
-    setSelectedPayment(null);
-    toast.success("Payment rejected");
+  const handleRejectPayment = async (notification: any) => {
+    try {
+      await updateNotificationStatus({
+        notificationId: notification._id,
+        status: 'rejected'
+      });
+      
+      setSelectedPayment(null);
+      toast.success("Payment rejected");
+    } catch (error) {
+      console.error("Error rejecting payment:", error);
+      toast.error("Failed to reject payment");
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -161,9 +113,20 @@ export default function UPIPaymentTracker({ eventId }: UPIPaymentTrackerProps) {
     );
   }
 
-  const pendingPayments = paymentRequests.filter(p => p.status === 'pending');
-  const verifiedPayments = paymentRequests.filter(p => p.status === 'verified');
-  const rejectedPayments = paymentRequests.filter(p => p.status === 'rejected');
+  if (!paymentNotifications) {
+    return (
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+        <div className="text-center py-8">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading payment notifications...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const pendingPayments = paymentNotifications.filter(p => p.status === 'pending');
+  const verifiedPayments = paymentNotifications.filter(p => p.status === 'verified');
+  const rejectedPayments = paymentNotifications.filter(p => p.status === 'rejected');
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">

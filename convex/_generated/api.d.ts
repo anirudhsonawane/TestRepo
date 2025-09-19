@@ -16,6 +16,7 @@ import type {
 import type * as constants from "../constants.js";
 import type * as events from "../events.js";
 import type * as passes from "../passes.js";
+import type * as paymentNotifications from "../paymentNotifications.js";
 import type * as purchaseComplete from "../purchaseComplete.js";
 import type * as seedPasses from "../seedPasses.js";
 import type * as storage from "../storage.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   constants: typeof constants;
   events: typeof events;
   passes: typeof passes;
+  paymentNotifications: typeof paymentNotifications;
   purchaseComplete: typeof purchaseComplete;
   seedPasses: typeof seedPasses;
   storage: typeof storage;

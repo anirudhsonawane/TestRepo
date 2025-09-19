@@ -49,42 +49,26 @@ export async function POST(req: NextRequest) {
     console.log("Getting Convex client...");
     const convex = getConvexClient();
     
-    // Store payment notification in a database table
-    // For now, we'll use a simple approach and store in a JSON file or database
-    // In a real implementation, you'd create a "paymentNotifications" table in Convex
-    
-    const paymentNotification = {
-      id: `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    // Store payment notification in Convex database
+    const notificationId = await convex.mutation(api.paymentNotifications.create, {
       eventId,
       userId,
       amount,
       quantity,
-      passId: passId || null,
-      upiTransactionId: upiTransactionId || null,
-      paymentMethod: paymentMethod || null,
-      notes: notes || null,
+      passId: passId || undefined,
+      upiTransactionId: upiTransactionId || undefined,
+      paymentMethod: paymentMethod || undefined,
+      notes: notes || undefined,
       contactMethod: contactMethod || 'whatsapp',
-      contactInfo: contactInfo || null,
-      userInfo: userInfo || null,
-      status: 'pending',
-      createdAt: Date.now(),
-      verifiedAt: null,
-      ticketCreated: false
-    };
+      contactInfo: contactInfo || undefined,
+      userInfo: userInfo || undefined,
+    });
     
-    console.log("Payment notification created:", paymentNotification);
-    
-    // TODO: Store in Convex database
-    // await convex.mutation(api.paymentNotifications.create, paymentNotification);
-    
-    // For now, we'll just log it and return success
-    // In production, you'd store this in your database
-    
-    console.log("Payment notification stored successfully");
+    console.log("Payment notification created with ID:", notificationId);
     
     return NextResponse.json({ 
       success: true, 
-      notificationId: paymentNotification.id,
+      notificationId: notificationId,
       message: "Payment notification received successfully"
     });
   } catch (error) {
