@@ -15,6 +15,20 @@ export const get = query({
             ))
             .collect();
     },
+});
+
+// Alias for getAll (used by admin panel)
+export const getAll = query({
+    args: {},
+    handler: async (ctx) => {
+        return await ctx.db
+            .query("events")
+            .filter((q) => q.or(
+                q.eq(q.field("is_cancelled"), undefined),
+                q.eq(q.field("is_cancelled"), false)
+            ))
+            .collect();
+    },
 });        
 
 

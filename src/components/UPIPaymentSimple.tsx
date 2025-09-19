@@ -3,9 +3,10 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Id } from "../../convex/_generated/dataModel";
-import { QrCode, Smartphone, Copy, Check, ExternalLink } from "lucide-react";
+import { QrCode, Smartphone, Copy, Check, ExternalLink, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import QRCodeLib from "qrcode";
+import PaymentNotificationForm from "./PaymentNotificationForm";
 
 interface UPIPaymentSimpleProps {
   eventId: Id<"events">;
@@ -32,6 +33,7 @@ export default function UPIPaymentSimple({
   const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
   const [paymentInitiated, setPaymentInitiated] = useState(false);
+  const [showNotificationForm, setShowNotificationForm] = useState(false);
   const [qrCodeDataURL, setQrCodeDataURL] = useState<string>("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -128,7 +130,7 @@ export default function UPIPaymentSimple({
           
           <div className="bg-green-50 rounded-lg p-4 border border-green-200">
             <p className="text-sm text-green-800 mb-3">
-              <strong>Important:</strong> Take a screenshot of your payment confirmation and contact the event organizer to verify your payment.
+              <strong>Payment completed!</strong> Now notify the organizer about your payment for ticket verification.
             </p>
             <div className="space-y-2">
               <p className="text-sm text-green-700">
@@ -142,6 +144,14 @@ export default function UPIPaymentSimple({
               </p>
             </div>
           </div>
+
+          <button
+            onClick={() => setShowNotificationForm(true)}
+            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Notify Organizer About Payment
+          </button>
 
           <div className="flex gap-3">
             <button
@@ -287,5 +297,18 @@ export default function UPIPaymentSimple({
         </div>
       </div>
     </div>
+  );
+}
+
+// Show payment notification form if requested
+if (showNotificationForm) {
+  return (
+    <PaymentNotificationForm
+      eventId={eventId}
+      eventName={eventName}
+      amount={amount}
+      quantity={quantity}
+      passId={passId}
+    />
   );
 }
