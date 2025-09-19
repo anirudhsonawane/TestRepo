@@ -65,8 +65,11 @@ export const updateUser = mutation({
     },
 });
 export const getUserById = query({
-  args: { userId: v.string() },
+  args: { userId: v.optional(v.string()) },
   handler: async (ctx, { userId }) => {
+    if (!userId) {
+      return null;
+    }
     const user = await ctx.db
       .query("users")
       .withIndex("by_user_id", (q) => q.eq("userId", userId))

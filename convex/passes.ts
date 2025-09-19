@@ -49,8 +49,11 @@ export const deletePass = mutation({
   },
 });
 export const getPassById = query({
-  args: { passId: v.id("passes") },
+  args: { passId: v.optional(v.id("passes")) },
   handler: async (ctx, { passId }) => {
+    if (!passId) {
+      return null;
+    }
     return await ctx.db.get(passId);
   },
 });

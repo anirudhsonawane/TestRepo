@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createRazorpayOrder } from "../../actions/createRazorpayOrder";
 import { Id } from "../../convex/_generated/dataModel";
+import { useUser } from "@clerk/nextjs";
 
 declare global {
   interface Window {
@@ -18,8 +19,13 @@ interface UPIPaymentProps {
 
 export default function UPIPayment({ eventId, eventName, amount }: UPIPaymentProps) {
   const [loading, setLoading] = useState(false);
+  const { user } = useUser();
 
   const handleUPIPayment = async () => {
+    if (!user) {
+      console.error("User not authenticated");
+      return;
+    }
     setLoading(true);
     try {
       const order = await createRazorpayOrder({ eventId });
@@ -31,14 +37,24 @@ export default function UPIPayment({ eventId, eventName, amount }: UPIPaymentPro
         name: "T-System",
         description: `Ticket for ${eventName}`,
         order_id: order.orderId,
-        handler: function (response: { razorpay_payment_id: string }) {
-          // Handle successful payment
-          window.location.href = `/tickets/purchase-success?payment_id=${response.razorpay_payment_id}`;
+        handler: function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
+          // Store payment verification data
+          if (!user?.id) {
+             console.error("User ID not available");
+             return;
+           }
+           localStorage.setItem('lastEventId', eventId);
+           localStorage.setItem('lastUserId', user.id);
+           localStorage.setItem('lastQuantity', '1');
+           localStorage.setItem('lastAmount', amount.toString());
+           localStorage.setItem('lastOrderId', response.razorpay_order_id);
+           localStorage.setItem('lastSignature', response.razorpay_signature);
+           window.location.href = `/tickets/purchase-success?payment_id=${response.razorpay_payment_id}`;
         },
         prefill: {
-          name: "Customer Name",
-          email: "customer@example.com",
-        },
+           name: user?.fullName || "Customer Name",
+           email: user?.emailAddresses?.[0]?.emailAddress || "customer@example.com",
+         },
         theme: {
           color: "#3399cc",
         },

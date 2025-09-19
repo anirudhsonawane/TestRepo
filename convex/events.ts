@@ -19,8 +19,11 @@ export const get = query({
 
 
 export const getById = query({
-    args: { eventId: v.id("events") },
+    args: { eventId: v.optional(v.id("events")) },
     handler: async (ctx, { eventId }) => {
+        if (!eventId) {
+            return null;
+        }
         return await ctx.db.get(eventId);
     },
 });

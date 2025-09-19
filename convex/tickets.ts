@@ -158,10 +158,13 @@ export const getUserTicketCount = query({
 // Get tickets for event owner to scan
 export const getEventTickets = query({
   args: { 
-    eventId: v.id("events"),
+    eventId: v.optional(v.id("events")),
     ownerId: v.string()
   },
   handler: async (ctx, { eventId, ownerId }) => {
+    if (!eventId) {
+      return [];
+    }
     // Verify event ownership
     const event = await ctx.db.get(eventId);
     if (!event || event.userId !== ownerId) {

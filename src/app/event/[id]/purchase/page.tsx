@@ -9,6 +9,8 @@ import { useState } from "react";
 import { ArrowLeft, Plus, Minus, Tag, Check } from "lucide-react";
 import Spinner from "@/components/Spinner";
 import { Button } from "@/components/ui/button";
+import UPIPaymentSimple from "@/components/UPIPaymentSimple";
+import { toast } from "sonner";
 
 declare global {
   interface Window {
@@ -89,12 +91,14 @@ export default function PurchasePage() {
         name: "T-System",
         description: `${quantity} ${selectedPass.name} for ${event.name}`,
         order_id: order.orderId,
-        handler: function (response: { razorpay_payment_id: string }) {
+        handler: function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
           localStorage.setItem('lastEventId', eventId);
           localStorage.setItem('lastUserId', user.id);
           localStorage.setItem('lastQuantity', quantity.toString());
           localStorage.setItem('lastAmount', totalAmount.toString());
           localStorage.setItem('lastPassId', passId);
+          localStorage.setItem('lastOrderId', response.razorpay_order_id);
+          localStorage.setItem('lastSignature', response.razorpay_signature);
           router.push(`/tickets/purchase-success?payment_id=${response.razorpay_payment_id}`);
         },
         prefill: {
@@ -221,23 +225,36 @@ export default function PurchasePage() {
               </span>
             </div>
 
-            <Button
-              onClick={handlePurchase}
-              disabled={isLoading || !user || availableQuantity === 0}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white font-semibold py-4 rounded-lg text-lg transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              {isLoading
-                ? "Processing Payment..."
-                : !user
-                ? "Sign in to Purchase"
-                : availableQuantity === 0
-                ? "Sold Out"
-                : `Pay ₹${totalAmount.toFixed(2)} with UPI/Card`}
-            </Button>
+            {!user ? (
+              <Button
+                disabled={true}
+                className="w-full bg-gray-300 text-white font-semibold py-4 rounded-lg text-lg cursor-not-allowed"
+              >
+                Sign in to Purchase
+              </Button>
+            ) : availableQuantity === 0 ? (
+              <Button
+                disabled={true}
+                className="w-full bg-gray-300 text-white font-semibold py-4 rounded-lg text-lg cursor-not-allowed"
+              >
+                Sold Out
+              </Button>
+            ) : (
+              <UPIPaymentSimple
+                eventId={eventId}
+                eventName={`${selectedPass.name} - ${event.name}`}
+                amount={totalAmount}
+                quantity={quantity}
+                passId={passId}
+                onPaymentInitiated={() => {
+                  toast.success("Payment initiated! Complete payment in your UPI app and contact the organizer for verification.");
+                }}
+              />
+            )}
 
-            {user && (
+            {user && availableQuantity > 0 && (
               <p className="text-xs text-gray-500 text-center mt-3">
-                Secure payment powered by Razorpay
+                Secure UPI payment - Contact organizer after payment for ticket verification
               </p>
             )}
           </div>

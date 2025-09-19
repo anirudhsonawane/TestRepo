@@ -12,7 +12,7 @@ function PurchaseSuccessContent() {
 
   useEffect(() => {
     if (paymentId && !ticketCreated) {
-      // Create ticket manually since webhook isn't working
+      // Create ticket manually with payment verification
       fetch('/api/manual-ticket', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -23,7 +23,9 @@ function PurchaseSuccessContent() {
           quantity: parseInt(localStorage.getItem('lastQuantity') || '1'),
           amount: parseInt(localStorage.getItem('lastAmount') || '100'),
           passId: localStorage.getItem('lastPassId'),
-        }),
+          razorpay_order_id: localStorage.getItem('lastOrderId'),
+          razorpay_signature: localStorage.getItem('lastSignature')
+        })
       })
       .then(res => res.json())
       .then(data => {

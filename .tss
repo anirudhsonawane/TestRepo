@@ -1,0 +1,2 @@
+output:"export"
+npm install -g serve

@@ -27,6 +27,13 @@ export async function createRazorpayOrder({
     throw new Error("No valid ticket offer found");
   }
 
+  try {
+    // API call
+  } catch (error) {
+    console.error('Order creation failed:', error);
+    throw new Error('Failed to create payment order');
+  }
+
   const order = await razorpay.orders.create({
     amount: Math.round(event.price * 100),
     currency: "INR",

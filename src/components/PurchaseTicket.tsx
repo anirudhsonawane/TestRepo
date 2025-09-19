@@ -11,6 +11,7 @@ import { Id } from "../../convex/_generated/dataModel";
 import { WAITING_LIST_STATUS } from "../../convex/constants";
 import { toast } from "sonner";
 import { ConvexError } from "convex/values";
+import UPIPaymentSimple from "./UPIPaymentSimple";
 
 declare global {
   interface Window {
@@ -144,12 +145,14 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
         name: "T-System",
         description: `${quantity} Ticket${quantity > 1 ? 's' : ''} for ${event.name}`,
         order_id: order.orderId,
-        handler: function (response: { razorpay_payment_id: string }) {
-          // Store data for manual ticket creation
+        handler: function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
+          // Store data for manual ticket creation with payment verification
           localStorage.setItem('lastEventId', eventId);
           localStorage.setItem('lastUserId', user.id);
           localStorage.setItem('lastQuantity', quantity.toString());
           localStorage.setItem('lastAmount', totalAmount.toString());
+          localStorage.setItem('lastOrderId', response.razorpay_order_id);
+          localStorage.setItem('lastSignature', response.razorpay_signature);
           router.push(`/tickets/purchase-success?payment_id=${response.razorpay_payment_id}`);
         },
         prefill: {
@@ -277,15 +280,15 @@ export default function PurchaseTicket({ eventId }: { eventId: Id<"events"> }) {
             </div>
           </div>
 
-          <button
-            onClick={handlePurchase}
-            disabled={isExpired || isLoading}
-            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-4 rounded-lg font-bold shadow-md hover:from-amber-600 hover:to-amber-700 transform hover:scale-[1.02] transition-all duration-200 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 text-lg"
-          >
-            {isLoading
-              ? "Opening payment..."
-              : `Pay ₹${totalAmount} with UPI/Card →`}
-          </button>
+          <UPIPaymentSimple
+            eventId={eventId}
+            eventName={event.name}
+            amount={totalAmount}
+            quantity={quantity}
+            onPaymentInitiated={() => {
+              toast.success("Payment initiated! Complete payment in your UPI app and contact the organizer for verification.");
+            }}
+          />
 
           <div className="mt-4">
             <ReleaseTicket eventId={eventId} waitingListId={queuePosition._id} />

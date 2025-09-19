@@ -2,6 +2,10 @@
 
 import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
+// If module not found, install it using:
+// npm install @radix-ui/react-toast
+// or
+// yarn add @radix-ui/react-toast
 import { cva, type VariantProps } from "class-variance-authority"
 import { X } from "lucide-react"
 

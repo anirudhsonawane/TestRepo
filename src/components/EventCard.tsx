@@ -220,7 +220,7 @@ export default function EventCard({ eventId, hideBuyButton = false }: { eventId:
     >
       <div className="relative w-full h-40 sm:h-56 md:h-72 overflow-hidden">
         <Image
-          src={`${imageUrl}?t=${Date.now()}`}
+          src={imageUrl ? `${imageUrl}?t=${Date.now()}` : '/event-images/image.png'}
           alt={event.name}
           fill
           className="object-cover group-hover:scale-110 transition-transform duration-500"

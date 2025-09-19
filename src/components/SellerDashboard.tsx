@@ -13,6 +13,7 @@ import type { AccountStatus } from "../../actions/getStripeConnectAccountStatus"
 import { CalendarDays, Cog, Plus } from "lucide-react";
 import Link from "next/link";
 import Spinner from "./Spinner";
+import UPIPaymentVerification from "./UPIPaymentVerification";
 
 export default function SellerDashboard() {
   const [accountCreatePending, setAccountCreatePending] = useState(false);
