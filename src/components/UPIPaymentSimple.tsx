@@ -110,6 +110,19 @@ export default function UPIPaymentSimple({
     }, 2000);
   };
 
+  // Show payment notification form if requested
+  if (showNotificationForm) {
+    return (
+      <PaymentNotificationForm
+        eventId={eventId}
+        eventName={eventName}
+        amount={amount}
+        quantity={quantity}
+        passId={passId}
+      />
+    );
+  }
+
   if (paymentInitiated) {
     return (
       <div className="bg-white p-6 rounded-xl shadow-lg border border-green-200">
@@ -297,18 +310,5 @@ export default function UPIPaymentSimple({
         </div>
       </div>
     </div>
-  );
-}
-
-// Show payment notification form if requested
-if (showNotificationForm) {
-  return (
-    <PaymentNotificationForm
-      eventId={eventId}
-      eventName={eventName}
-      amount={amount}
-      quantity={quantity}
-      passId={passId}
-    />
   );
 }
