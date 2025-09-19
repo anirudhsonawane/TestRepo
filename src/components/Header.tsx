@@ -5,9 +5,12 @@ import Link  from "next/link";
 import logo from "@/app/logo.png";
 import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import SearchBar from "./SearchBar";
+import { isAuthorizedAdmin } from "@/lib/admin-config";
+import { Shield } from "lucide-react";
 
 function Header() {
-  const { isLoaded } = useUser();
+  const { isLoaded, user } = useUser();
+  const isAdmin = user && isAuthorizedAdmin(user.emailAddresses[0]?.emailAddress || '');
 
   return (
     <div className="border-b relative z-40">
@@ -55,6 +58,16 @@ function Header() {
         <div className="hidden lg:block ml-auto">
           <SignedIn>
             <div className="flex items-center gap-3">
+              {isAdmin && (
+                <Link href="/admin/payments">
+                  <button className="bg-green-600 text-white px-3 py-1.5 text-sm rounded-lg
+                  hover:bg-green-700 transition flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Admin Panel
+                  </button>
+                </Link>
+              )}
+              
               <Link href="/seller/new-event">
                 <button className="bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg
                 hover:bg-blue-700 transition">
@@ -93,6 +106,16 @@ function Header() {
         {/* Mobile Action Buttons */}
         <div className="lg:hidden w-full flex justify-center gap-3">
           <SignedIn>
+            {isAdmin && (
+              <Link href="/admin/payments" className="flex-1">
+                <button className="w-full bg-green-600 text-white px-3 py-1.5 text-sm rounded-lg
+                hover:bg-green-700 transition flex items-center justify-center gap-2">
+                  <Shield className="w-4 h-4" />
+                  Admin
+                </button>
+              </Link>
+            )}
+            
             <Link href="/seller/new-event" className="flex-1">
               <button className="w-full bg-blue-600 text-white px-3 py-1.5 text-sm rounded-lg
               hover:bg-blue-700 transition">
