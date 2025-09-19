@@ -153,9 +153,9 @@ export default function SmartFloatingButton() {
           </div>
         )}
 
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50">
         {/* Menu Items */}
-        <div className={`absolute bottom-16 right-0 mb-2 space-y-2 transition-all duration-300 ${
+        <div className={`absolute bottom-16 right-0 mb-2 space-y-2 transition-all duration-300 max-h-[70vh] overflow-y-auto ${
           isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
         }`}>
           {menuItems.map((item, index) => {
@@ -163,17 +163,17 @@ export default function SmartFloatingButton() {
             return (
               <div
                 key={index}
-                className={`flex items-center space-x-3 ${item.color} text-white px-4 py-3 rounded-full shadow-lg cursor-pointer transform transition-all duration-200 hover:scale-105`}
+                className={`flex items-center space-x-2 ${item.color} text-white px-3 py-2 rounded-full shadow-lg cursor-pointer transform transition-all duration-200 hover:scale-105 text-xs md:text-sm`}
                 onClick={() => {
                   item.action();
                   setIsOpen(false);
                 }}
                 style={{
-                  animationDelay: isOpen ? `${index * 0.1}s` : '0s',
+                  animationDelay: isOpen ? `${index * 0.05}s` : '0s',
                 }}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-sm font-medium whitespace-nowrap">
+                <Icon className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="font-medium whitespace-nowrap hidden sm:block">
                   {item.label}
                 </span>
               </div>
@@ -184,7 +184,7 @@ export default function SmartFloatingButton() {
         {/* Main FAB Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
+          className={`w-12 h-12 md:w-14 md:h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
             isOpen 
               ? 'bg-red-600 hover:bg-red-700' 
               : 'bg-blue-600 hover:bg-blue-700'
@@ -192,9 +192,9 @@ export default function SmartFloatingButton() {
           aria-label="Quick Actions"
         >
           {isOpen ? (
-            <X className="w-6 h-6 text-white" />
+            <X className="w-5 h-5 md:w-6 md:h-6 text-white" />
           ) : (
-            <MessageCircle className="w-6 h-6 text-white" />
+            <MessageCircle className="w-5 h-5 md:w-6 md:h-6 text-white" />
           )}
         </button>
 
