@@ -14,6 +14,7 @@ import { CalendarDays, Cog, Plus } from "lucide-react";
 import Link from "next/link";
 import Spinner from "./Spinner";
 import UPIPaymentVerification from "./UPIPaymentVerification";
+import UPIPaymentTracker from "./UPIPaymentTracker";
 
 export default function SellerDashboard() {
   const [accountCreatePending, setAccountCreatePending] = useState(false);
