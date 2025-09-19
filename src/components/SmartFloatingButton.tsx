@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter, usePathname } from "next/navigation";
 import { 
-  Plus, 
   X, 
   Shield, 
   Ticket, 
@@ -185,7 +184,7 @@ export default function SmartFloatingButton() {
           onClick={() => setIsOpen(!isOpen)}
           className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ${
             isOpen 
-              ? 'bg-red-600 hover:bg-red-700 rotate-45' 
+              ? 'bg-red-600 hover:bg-red-700' 
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
           aria-label="Quick Actions"
@@ -193,7 +192,7 @@ export default function SmartFloatingButton() {
           {isOpen ? (
             <X className="w-6 h-6 text-white" />
           ) : (
-            <Plus className="w-6 h-6 text-white" />
+            <MessageCircle className="w-6 h-6 text-white" />
           )}
         </button>
 
