@@ -177,9 +177,9 @@ export default function UPIPaymentTracker({ eventId }: UPIPaymentTrackerProps) {
             
             {pendingPayments.map((payment) => (
               <div
-                key={payment.id}
+                key={payment._id}
                 className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                  selectedPayment?.id === payment.id
+                  selectedPayment?._id === payment._id
                     ? 'border-blue-500 bg-blue-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
@@ -195,7 +195,7 @@ export default function UPIPaymentTracker({ eventId }: UPIPaymentTrackerProps) {
                         ₹{payment.amount} - {payment.quantity} ticket{payment.quantity > 1 ? 's' : ''}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {payment.userInfo?.name || 'Unknown User'} • {new Date(payment.createdAt).toLocaleString()}
+                        {payment.userInfo?.name || 'Unknown User'} • {new Date(payment._creationTime).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -245,7 +245,7 @@ export default function UPIPaymentTracker({ eventId }: UPIPaymentTrackerProps) {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Payment Time:</span>
-                <span className="font-medium">{new Date(selectedPayment.createdAt).toLocaleString()}</span>
+                <span className="font-medium">{new Date(selectedPayment._creationTime).toLocaleString()}</span>
               </div>
               {selectedPayment.paymentProof && (
                 <div className="mt-2">
@@ -302,10 +302,10 @@ export default function UPIPaymentTracker({ eventId }: UPIPaymentTrackerProps) {
             <h4 className="font-medium text-gray-900">Recent Activity</h4>
             <div className="space-y-2">
               {[...verifiedPayments, ...rejectedPayments]
-                .sort((a, b) => b.createdAt - a.createdAt)
+                .sort((a, b) => b._creationTime - a._creationTime)
                 .slice(0, 5)
                 .map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={payment._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     {getStatusIcon(payment.status)}
                     <span className="text-sm">

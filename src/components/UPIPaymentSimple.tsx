@@ -97,17 +97,39 @@ export default function UPIPaymentSimple({
   const handleOpenUPI = () => {
     handlePaymentInitiated();
     
-    // Try to open UPI deep link
-    const link = document.createElement('a');
-    link.href = upiDeepLink;
-    link.click();
+    // Check if user is on mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    // Fallback: show instructions if deep link doesn't work
-    setTimeout(() => {
-      if (!paymentInitiated) {
-        toast.info("If the UPI app didn't open, copy the link and paste it in your UPI app manually.");
-      }
-    }, 2000);
+    if (isMobile) {
+      // Try to open PhonePe specifically on mobile
+      const phonepeUrl = `phonepe://pay?pa=${UPI_ID}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`${quantity} ticket${quantity > 1 ? 's' : ''} for ${eventName}`)}`;
+      
+      // Try PhonePe first
+      const phonepeLink = document.createElement('a');
+      phonepeLink.href = phonepeUrl;
+      phonepeLink.click();
+      
+      // Fallback to generic UPI after a short delay
+      setTimeout(() => {
+        const link = document.createElement('a');
+        link.href = upiDeepLink;
+        link.click();
+      }, 1000);
+      
+      // Show instructions
+      setTimeout(() => {
+        toast.info("Opening PhonePe for payment. If PhonePe doesn't open, please open it manually and scan the QR code below.");
+      }, 2000);
+    } else {
+      // For desktop, show QR code or generic UPI
+      const link = document.createElement('a');
+      link.href = upiDeepLink;
+      link.click();
+      
+      setTimeout(() => {
+        toast.info("Please scan the QR code with PhonePe or any UPI app to complete payment.");
+      }, 2000);
+    }
   };
 
   // Show payment notification form if requested
@@ -257,7 +279,7 @@ export default function UPIPaymentSimple({
             className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md flex items-center justify-center gap-2"
           >
             <Smartphone className="w-5 h-5" />
-            Pay ₹{amount} with UPI
+            Pay ₹{amount} with PhonePe
           </button>
 
           <div className="flex gap-3">
@@ -305,7 +327,8 @@ export default function UPIPaymentSimple({
         )}
 
         <div className="text-xs text-gray-500 text-center">
-          <p>Supported apps: GPay, PhonePe, Paytm, BHIM, and more</p>
+          <p>Recommended: PhonePe (opens automatically on mobile)</p>
+          <p className="mt-1">Also works with: GPay, Paytm, BHIM, and other UPI apps</p>
           <p className="mt-1">After payment, contact the organizer with your payment screenshot</p>
         </div>
       </div>

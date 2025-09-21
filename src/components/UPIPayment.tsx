@@ -64,6 +64,10 @@ export default function UPIPayment({ eventId, eventName, amount }: UPIPaymentPro
           netbanking: false,
           wallet: false,
         },
+        upi: {
+          flow: "intent",
+          vpa: process.env.NEXT_PUBLIC_UPI_ID || "your-upi-id@bank"
+        },
       };
 
       const rzp = new window.Razorpay(options);
@@ -81,7 +85,7 @@ export default function UPIPayment({ eventId, eventName, amount }: UPIPaymentPro
       disabled={loading}
       className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
     >
-      {loading ? "Processing..." : `Pay ₹${amount} via UPI`}
+      {loading ? "Processing..." : `Pay ₹${amount} with PhonePe`}
     </button>
   );
 }
