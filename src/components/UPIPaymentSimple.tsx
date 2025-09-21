@@ -147,34 +147,34 @@ export default function UPIPaymentSimple({
 
   if (paymentInitiated) {
     return (
-      <div className="bg-white p-6 rounded-xl shadow-lg border border-green-200">
+      <div className="bg-white p-6 rounded-xl shadow-lg border border-yellow-200">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-              <Smartphone className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+              <Smartphone className="w-6 h-6 text-yellow-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-green-900">
+              <h3 className="text-lg font-semibold text-yellow-900">
                 Payment Initiated
               </h3>
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-yellow-700">
                 Complete payment in your UPI app
               </p>
             </div>
           </div>
           
-          <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-            <p className="text-sm text-green-800 mb-3">
-              <strong>Payment completed!</strong> Now notify the organizer about your payment for ticket verification.
+          <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+            <p className="text-sm text-yellow-800 mb-3 font-bold">
+              Payment completed! Now notify the organizer about your payment for ticket verification.
             </p>
             <div className="space-y-2">
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-yellow-800">
                 <strong>Amount:</strong> ₹{amount}
               </p>
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-yellow-800">
                 <strong>Note:</strong> {quantity} ticket{quantity > 1 ? 's' : ''} for {eventName}
               </p>
-              <p className="text-sm text-green-700">
+              <p className="text-sm text-yellow-800">
                 <strong>UPI ID:</strong> {UPI_ID}
               </p>
             </div>
@@ -182,7 +182,7 @@ export default function UPIPaymentSimple({
 
           <button
             onClick={() => setShowNotificationForm(true)}
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-yellow-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-yellow-700 transition-colors flex items-center justify-center gap-2"
           >
             <MessageCircle className="w-4 h-4" />
             Notify Organizer About Payment

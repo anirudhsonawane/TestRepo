@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Id } from "../../convex/_generated/dataModel";
-import { Smartphone, Upload, CheckCircle, AlertCircle, MessageCircle } from "lucide-react";
+import { Smartphone, CheckCircle, AlertCircle, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface PaymentNotificationFormProps {
@@ -26,11 +26,8 @@ export default function PaymentNotificationForm({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     upiTransactionId: "",
-    paymentMethod: "",
-    paymentScreenshot: null as File | null,
-    notes: "",
-    contactMethod: "whatsapp",
-    contactInfo: ""
+    payeeName: "",
+    payeeMobileNumber: ""
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,8 +38,8 @@ export default function PaymentNotificationForm({
       return;
     }
 
-    if (!formData.upiTransactionId && !formData.notes) {
-      toast.error("Please provide either UPI Transaction ID or payment details");
+    if (!formData.upiTransactionId || !formData.payeeName || !formData.payeeMobileNumber) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
@@ -60,10 +57,8 @@ export default function PaymentNotificationForm({
           quantity,
           passId,
           upiTransactionId: formData.upiTransactionId,
-          paymentMethod: formData.paymentMethod,
-          notes: formData.notes,
-          contactMethod: formData.contactMethod,
-          contactInfo: formData.contactInfo,
+          payeeName: formData.payeeName,
+          payeeMobileNumber: formData.payeeMobileNumber,
           userInfo: {
             name: user.fullName,
             email: user.emailAddresses[0]?.emailAddress
@@ -95,15 +90,6 @@ export default function PaymentNotificationForm({
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setFormData(prev => ({
-        ...prev,
-        paymentScreenshot: file
-      }));
-    }
-  };
 
   if (isSubmitted) {
     return (
@@ -175,7 +161,7 @@ export default function PaymentNotificationForm({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              UPI Transaction ID *
+              UID / Transaction ID (required field) *
             </label>
             <input
               type="text"
@@ -193,80 +179,31 @@ export default function PaymentNotificationForm({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Payment Method Used *
-            </label>
-            <select
-              name="paymentMethod"
-              value={formData.paymentMethod}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Select payment method</option>
-              <option value="gpay">Google Pay</option>
-              <option value="phonepe">PhonePe</option>
-              <option value="paytm">Paytm</option>
-              <option value="bhim">BHIM</option>
-              <option value="other">Other UPI App</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Payment Screenshot (Optional)
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Upload a screenshot of your payment confirmation
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Additional Notes
-            </label>
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleInputChange}
-              rows={3}
-              placeholder="Any additional payment details or notes..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Preferred Contact Method
-            </label>
-            <select
-              name="contactMethod"
-              value={formData.contactMethod}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="whatsapp">WhatsApp</option>
-              <option value="email">Email</option>
-              <option value="phone">Phone</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Contact Information
+              Payee Name (required field) *
             </label>
             <input
               type="text"
-              name="contactInfo"
-              value={formData.contactInfo}
+              name="payeeName"
+              value={formData.payeeName}
               onChange={handleInputChange}
-              placeholder="Your WhatsApp number, email, or phone number"
+              placeholder="Enter your full name"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Payee Mobile Number (required field) *
+            </label>
+            <input
+              type="tel"
+              name="payeeMobileNumber"
+              value={formData.payeeMobileNumber}
+              onChange={handleInputChange}
+              placeholder="Enter your mobile number"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
           </div>
 
@@ -277,7 +214,7 @@ export default function PaymentNotificationForm({
                 <p className="font-medium mb-1">Important:</p>
                 <ul className="space-y-1">
                   <li>• Make sure you have completed the payment in your UPI app</li>
-                  <li>• Provide accurate transaction details for faster verification</li>
+                  <li>• Provide accurate UPI Transaction ID for faster verification</li>
                   <li>• The organizer will verify your payment before creating your ticket</li>
                   <li>• You'll receive your ticket via email once verified</li>
                 </ul>
