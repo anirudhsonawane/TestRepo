@@ -220,14 +220,20 @@ export default function EventCard({ eventId, hideBuyButton = false }: { eventId:
     >
       <div className="relative w-full h-40 sm:h-56 md:h-72 overflow-hidden">
         <Image
-          src={imageUrl ? `${imageUrl}?t=${Date.now()}` : '/event-images/image.png'}
+          src={imageUrl || '/event-images/image.png'}
           alt={event.name}
           fill
           className="object-cover group-hover:scale-110 transition-transform duration-500"
-          priority
-          loading="eager"
-          key={imageUrl} // Ensures the image component re-renders when the source changes
-          unoptimized // Disable Next.js optimization for immediate loading
+          priority={false}
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          quality={75}
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+          unoptimized={false}
+          onLoad={() => {
+            // Optional: Add any loading completion logic here
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent group-hover:from-black/60 transition-all duration-300" />
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
