@@ -230,9 +230,14 @@ export default function EventCard({ eventId, hideBuyButton = false }: { eventId:
           quality={75}
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-          unoptimized={false}
+          unoptimized={true}
+          onError={(e) => {
+            console.error('Image failed to load:', e);
+            // Fallback to default image
+            e.currentTarget.src = '/event-images/image.png';
+          }}
           onLoad={() => {
-            // Optional: Add any loading completion logic here
+            console.log('Image loaded successfully');
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent group-hover:from-black/60 transition-all duration-300" />
@@ -279,7 +284,7 @@ export default function EventCard({ eventId, hideBuyButton = false }: { eventId:
               </span>
             )}
             <div>
-              {!isPastEvent && availability.activeOffers > 0 && !userTicket && (
+              {isEventOwner && !isPastEvent && availability.activeOffers > 0 && !userTicket && (
                 <span className="text-amber-600 text-sm ml-2">
                   ({availability.activeOffers}{" "}
                   {availability.activeOffers === 1 ? "person" : "people"} trying
@@ -307,13 +312,21 @@ export default function EventCard({ eventId, hideBuyButton = false }: { eventId:
           <div className="flex items-center text-gray-600">
             <Ticket className="w-4 h-4 mr-2" />
             <span>
-              {availability.purchasedCount} tickets sold ({isPastEvent || availability.remainingTickets === 0 ? 'Sold Out' : `${availability.remainingTickets} available`})
-              {!isPastEvent && availability.remainingTickets > 0 && availability.activeOffers > 0 && !userTicket && (
-                <span className="text-amber-600 text-sm ml-2">
-                  ({availability.activeOffers}{" "}
-                  {availability.activeOffers === 1 ? "person" : "people"} trying
-                  to buy)
-                </span>
+              {isEventOwner ? (
+                // Show detailed counts for event owners
+                <>
+                  {availability.purchasedCount} tickets sold ({isPastEvent || availability.remainingTickets === 0 ? 'Sold Out' : `${availability.remainingTickets} available`})
+                  {!isPastEvent && availability.remainingTickets > 0 && availability.activeOffers > 0 && !userTicket && (
+                    <span className="text-amber-600 text-sm ml-2">
+                      ({availability.activeOffers}{" "}
+                      {availability.activeOffers === 1 ? "person" : "people"} trying
+                      to buy)
+                    </span>
+                  )}
+                </>
+              ) : (
+                // Show only availability status for normal users
+                isPastEvent || availability.remainingTickets === 0 ? 'Sold Out' : 'Available'
               )}
             </span>
           </div>
