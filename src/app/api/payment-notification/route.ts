@@ -1,66 +1,81 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@/convex/_generated/api';
+import { NextRequest, NextResponse } from "next/server";
+import { ConvexHttpClient } from "convex/browser";
+import { api } from "../../../../convex/_generated/api";
 
-const getConvexClient = () => {
-  if (!process.env.NEXT_PUBLIC_CONVEX_URL) {
-    throw new Error("NEXT_PUBLIC_CONVEX_URL is not set");
-  }
-  return new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL);
-};
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const body = await req.json();
-    const { 
-      eventId, 
-      userId, 
-      amount, 
-      quantity, 
-      passId, 
-      upiTransactionId, 
-      payeeName, 
+    const body = await request.json();
+    
+    const {
+      eventId,
+      userId,
+      amount,
+      quantity,
+      passId,
+      upiTransactionId,
+      payeeName,
       payeeMobileNumber,
-      userInfo 
+      userInfo
     } = body;
 
     // Validate required fields
-    if (!eventId || !userId || !amount || !upiTransactionId || !payeeName || !payeeMobileNumber) {
+    if (!eventId || !userId || !amount || !quantity || !upiTransactionId || !payeeName || !payeeMobileNumber) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
+        { success: false, error: "Missing required fields" },
         { status: 400 }
       );
     }
 
     // Create payment notification in Convex
-    const convex = getConvexClient();
     const notificationId = await convex.mutation(api.paymentNotifications.create, {
       eventId,
       userId,
       amount,
-      quantity: quantity || 1,
+      quantity,
       passId,
       upiTransactionId,
       payeeName,
       payeeMobileNumber,
-      userInfo: userInfo || {},
-      status: 'pending'
+      userInfo
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       notificationId,
-      message: 'Payment notification created successfully' 
+      message: "Payment notification submitted successfully"
     });
 
   } catch (error) {
-    console.error('Payment notification API error:', error);
+    console.error("Error creating payment notification:", error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { success: false, error: "Failed to create payment notification" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const eventId = searchParams.get("eventId");
+    const userId = searchParams.get("userId");
+
+    if (eventId) {
+      const notifications = await convex.query(api.paymentNotifications.getByEvent, { eventId });
+      return NextResponse.json({ success: true, notifications });
+    } else if (userId) {
+      const notifications = await convex.query(api.paymentNotifications.getByUser, { userId });
+      return NextResponse.json({ success: true, notifications });
+    } else {
+      const notifications = await convex.query(api.paymentNotifications.getAllPending);
+      return NextResponse.json({ success: true, notifications });
+    }
+  } catch (error) {
+    console.error("Error fetching payment notifications:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch payment notifications" },
       { status: 500 }
     );
   }

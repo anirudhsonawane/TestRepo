@@ -323,3 +323,51 @@ export const getTicketStatus = query({
     };
   },
 });
+
+// Create a single ticket manually (for UPI payments)
+export const create = mutation({
+  args: {
+    eventId: v.id("events"),
+    userId: v.string(),
+    amount: v.number(),
+    quantity: v.number(),
+    passId: v.optional(v.id("passes")),
+    paymentIntentId: v.string(),
+    upiTransactionId: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, { eventId, userId, amount, quantity, passId, paymentIntentId, upiTransactionId, notes }) => {
+    const event = await ctx.db.get(eventId);
+    if (!event) throw new ConvexError("Event not found");
+
+    // Create tickets based on quantity
+    const ticketIds = [];
+    const baseTime = Date.now();
+    
+    for (let i = 0; i < quantity; i++) {
+      const ticketId = await ctx.db.insert("tickets", {
+        eventId,
+        userId,
+        purchasedAt: baseTime + i,
+        status: TICKET_STATUS.VALID,
+        paymentIntentId,
+        amount: passId ? Math.round(amount / quantity) : event.price,
+        passId,
+      });
+      ticketIds.push(ticketId);
+    }
+    
+    // Update pass sold quantity if passId is provided
+    if (passId) {
+      const pass = await ctx.db.get(passId);
+      if (pass) {
+        const newSoldQuantity = pass.soldQuantity + quantity;
+        await ctx.db.patch(passId, {
+          soldQuantity: newSoldQuantity,
+        });
+      }
+    }
+
+    return ticketIds;
+  },
+});
